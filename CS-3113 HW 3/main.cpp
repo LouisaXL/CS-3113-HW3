@@ -41,10 +41,7 @@ constexpr char  FISH_FILEPATH[] = "fish.png",
                 HOOK_FILEPATH[] = "hook.png",
                 BACKGROUND_FILEPATH[] = "background.png",
                 WIN_FILEPATH[] = "win.png",
-                LOOSE_FILEPATH[] = "loose.png",
-                STAHIGH_FILEPATH[] = "stamina_high.png",
-                STAMID_FILEPATH[] = "stamina_mid.png",
-                STALOW_FILEPATH[] = "stamina_low.png";
+                LOOSE_FILEPATH[] = "loose.png";
 
 
 constexpr GLint NUMBER_OF_TEXTURES = 1,
@@ -69,7 +66,7 @@ struct GameState
     Entity* win;
     Entity* loose;
     Entity* background;
-    //Entity** stamina;
+    Entity* stamina;
 };
 
 // ————— VARIABLES ————— //
@@ -92,11 +89,10 @@ void shutdown();
 
 constexpr glm::vec3 BIGFISH_INIT_SCALE = glm::vec3(8.0f, 1.0f, 0.0f);   // TODO: DELETE THIS
 
-const float DRAG = 0.5f;    // TODO: DELETE THIS
-
 bool game_end;
 int win_loose;
 
+int stamina = 100;
 
 // ———— GENERAL FUNCTIONS ———— //
 GLuint load_texture(const char* filepath, FilterType filterType)
@@ -184,7 +180,7 @@ void initialise()
         1.0f,                      // speed
         acceleration,               // acceleration
         0.3f,                       // up power
-        DRAG,                       // drag = friction
+        stamina,                       // drag = friction
         player_walking_animation,  // animation index sets
         0.0f,                      // animation time
         4,                         // animation frame amount
@@ -194,7 +190,7 @@ void initialise()
     );
 
     g_game_state.player->face_down();
-    g_game_state.player->set_position(glm::vec3(0.0f, 2.0f, 0.0f)); // TODO ???
+    g_game_state.player->set_position(glm::vec3(0.0f, 2.0f, 0.0f)); 
     g_game_state.player->set_acceleration(glm::vec3(0.0f, ACC_OF_GRAVITY * 0.1, 0.0f));
 
     // ————— NPCs ————— //
@@ -241,7 +237,15 @@ void initialise()
     g_game_state.loose->update(0.0f, g_game_state.player, 1);
 
     // STAMINA ARRAY
-    //g_game_state.stamina = new Entity ** 3;
+    g_game_state.stamina = new Entity[3];
+    for (int i = 0; i < 3; i++)
+    {
+        if (i == 0) { g_game_state.stamina[i].set_texture_id(load_texture("stamina_low.png", LINEAR)); }
+        if (i == 1) { g_game_state.stamina[i].set_texture_id(load_texture("stamina_mid.png", LINEAR)); }
+        if (i == 2) { g_game_state.stamina[i].set_texture_id(load_texture("stamina_high.png", LINEAR)); }
+        g_game_state.stamina[i].set_position(glm::vec3(-4.0f, 2.5f, 0.0f));
+        g_game_state.stamina[i].update(0.0f, nullptr, 0);
+    }
 
 
     // ————— GENERAL ————— //
@@ -366,6 +370,10 @@ void render()
     g_game_state.bigfish->render(&g_shader_program);
 
     g_game_state.hook->render(&g_shader_program);
+
+    if (g_game_state.player->get_stamina() > 90) g_game_state.stamina[2].render(&g_shader_program);
+    if (g_game_state.player->get_stamina() >= 30 && g_game_state.player->get_stamina() <= 90) g_game_state.stamina[1].render(&g_shader_program);
+    if (g_game_state.player->get_stamina() < 30) g_game_state.stamina[0].render(&g_shader_program);
 
     if (game_end && win_loose == 1) g_game_state.win->render(&g_shader_program);        // if win
     else if (game_end && win_loose == 0) g_game_state.loose->render(&g_shader_program); // if loose

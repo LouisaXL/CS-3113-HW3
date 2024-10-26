@@ -17,7 +17,7 @@ private:
     glm::mat4 m_model_matrix;
     
     float     m_speed;
-    float     m_drag;
+    int     m_stamina;
 
     // ————— TEXTURES ————— //
     GLuint    m_texture_id;
@@ -49,7 +49,7 @@ public:
 
     // ————— METHODS ————— //
     Entity();
-    Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, float drag, int walking[4][4], float animation_time,
+    Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, int stamina, int walking[4][4], float animation_time,
            int animation_frames, int animation_index, int animation_cols, 
            int animation_rows);
     Entity(GLuint texture_id, float speed); // Simpler constructor
@@ -81,6 +81,8 @@ public:
     float     const get_speed()      const { return m_speed;      }
     glm::vec3 const get_velocity()     const { return m_velocity; };
     glm::vec3 const get_acceleration() const { return m_acceleration; };
+
+    int const get_stamina() const { return m_stamina; }
 
 
     // ————— SETTERS ————— //
